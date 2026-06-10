@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abby's Itinerary — Europe 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f7f6;
+    --bg-card: #ffffff;
+    --border: rgba(0,0,0,0.10);
+    --border-mid: rgba(0,0,0,0.18);
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --text-faint: #9b9b9b;
+    --blue: #378ADD;
+    --blue-bg: #E6F1FB;
+    --blue-text: #0C447C;
+    --green: #1D9E75;
+    --green-bg: #E1F5EE;
+    --green-text: #085041;
+    --purple: #534AB7;
+    --purple-bg: #EEEDFE;
+    --purple-text: #3C3489;
+    --amber: #EF9F27;
+    --amber-bg: #FAEEDA;
+    --amber-text: #633806;
+    --red-bg: #FCEBEB;
+    --red-text: #A32D2D;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-soft);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .page-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 14px;
+  }
+  .tab-btn {
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border-mid);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { background: var(--bg-soft); }
+  .tab-btn.active {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+
+  .content { padding: 20px 24px; max-width: 860px; margin: 0 auto; }
+
+  .hidden { display: none !important; }
+
+  /* SUMMARY */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 600; color: var(--text); }
+
+  .alert-bar {
+    background: var(--amber-bg);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--amber-text);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .alert-bar strong { font-weight: 600; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-faint);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin: 20px 0 10px;
+  }
+
+  .leg-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .leg-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .leg-header:hover { background: var(--bg-soft); }
+  .leg-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 16px;
+  }
+  .leg-meta { flex: 1; min-width: 0; }
+  .leg-title { font-size: 14px; font-weight: 500; color: var(--text); }
+  .leg-dates { font-size: 12px; color: var(--text-muted); }
+  .leg-nights { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .chev { font-size: 12px; color: var(--text-faint); transition: transform .2s; margin-left: 8px; }
+  .chev.open { transform: rotate(180deg); }
+
+  .leg-body { padding: 0 16px 12px; border-top: 1px solid var(--border); }
+  .detail-row {
+    display: flex; gap: 8px; align-items: flex-start;
+    padding: 6px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .d-icon { color: var(--text-faint); width: 16px; flex-shrink: 0; padding-top: 2px; font-size: 14px; }
+  .d-label { color: var(--text-muted); min-width: 72px; flex-shrink: 0; }
+  .d-val { color: var(--text); flex: 1; line-height: 1.5; }
+  .ref-pill {
+    display: inline-block;
+    font-size: 11px; font-family: monospace;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 5px;
+    color: var(--text-muted); margin-left: 5px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+  }
+  .badge-ok { background: var(--green-bg); color: var(--green-text); }
+  .badge-warn { background: var(--amber-bg); color: var(--amber-text); }
+
+  /* DAY VIEW */
+  .month-hdr {
+    font-size: 11px; font-weight: 600; color: var(--text-faint);
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: 16px 0 6px 98px;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-row { display: grid; grid-template-columns: 90px 1fr; }
+  .day-date-col {
+    padding: 10px 12px 10px 0;
+    border-right: 2px solid var(--border);
+    text-align: right;
+  }
+  .ddd { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .04em; }
+  .ddn { font-size: 18px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .day-content { padding: 10px 0 10px 16px; }
+  .day-loc { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .travel-banner {
+    background: var(--bg-soft); border-left: 3px solid var(--blue);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 4px 9px; margin: 3px 0; font-size: 12px; color: var(--text);
+  }
+  .action-banner-sm {
+    background: var(--amber-bg); border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 4px 9px; margin: 3px 0; font-size: 12px; color: var(--amber-text);
+  }
+  .quiet { font-size: 12px; color: var(--text-faint); padding-top: 2px; }
+
+  /* CALENDAR */
+  .cal-outer { display: flex; flex-direction: column; gap: 20px; }
+  .cal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .cal-hdr { padding: 14px 16px; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--border); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal-dow {
+    text-align: center; font-size: 11px; color: var(--text-faint);
+    padding: 6px 2px; letter-spacing: .05em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .cal-cell {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    min-height: 70px; padding: 5px 6px;
+    cursor: pointer; transition: background .12s;
+    overflow: hidden;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell.empty { cursor: default; background: var(--bg-soft); }
+  .cal-cell:not(.empty):hover { background: #f0f4ff; }
+  .cal-cell.selected { background: #e8effc; outline: 2px solid var(--blue); outline-offset: -2px; }
+  .cal-num { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .cal-cell.empty .cal-num { color: var(--text-faint); }
+  .cal-chip {
+    display: block; font-size: 10px; border-radius: 3px;
+    padding: 1px 5px; margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.5;
+  }
+  .chip-stay { background: var(--green-bg); color: var(--green-text); }
+  .chip-travel { background: var(--blue-bg); color: var(--blue-text); }
+  .chip-action { background: var(--amber-bg); color: var(--amber-text); }
+  .chip-transit { background: var(--purple-bg); color: var(--purple-text); }
+
+  /* DAY PANEL */
+  .day-panel {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px; margin-top: 14px;
+  }
+  .panel-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .panel-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .panel-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-faint); font-size: 18px; padding: 2px 6px;
+    line-height: 1; border-radius: 4px;
+  }
+  .panel-close:hover { background: var(--bg-soft); }
+  .panel-row {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 6px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .panel-row:last-child { border-bottom: none; }
+  .pi { color: var(--text-faint); width: 18px; flex-shrink: 0; padding-top: 1px; font-size: 15px; }
+  .pv { color: var(--text); flex: 1; line-height: 1.5; }
+
+  @media (max-width: 600px) {
+    .content { padding: 16px; }
+    .cal-chip { display: none; }
+    .cal-cell { min-height: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Abby's Europe trip 2026 ✈️</h1>
+  <p>12 June – 28 July &nbsp;·&nbsp; 46 days &nbsp;·&nbsp; 7 countries</p>
+  <div class="tabs">
+    <button class="tab-btn active" id="btn-summary" onclick="showView('summary')">Summary</button>
+    <button class="tab-btn" id="btn-dayview" onclick="showView('dayview')">Day by day</button>
+    <button class="tab-btn" id="btn-calendar" onclick="showView('calendar')">Calendar</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- SUMMARY -->
+  <div id="view-summary">
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">Departure</div><div class="stat-val">12 Jun</div></div>
+      <div class="stat-card"><div class="stat-label">Return</div><div class="stat-val">28 Jul</div></div>
+      <div class="stat-card"><div class="stat-label">Total days</div><div class="stat-val">46</div></div>
+      <div class="stat-card"><div class="stat-label">Countries</div><div class="stat-val">7</div></div>
+      <div class="stat-card"><div class="stat-label">Destinations</div><div class="stat-val">10</div></div>
+    </div>
+    <div class="alert-bar">
+      <strong>⚠️ Items still needing action:</strong> Train Rome→Monopoli (book) &nbsp;·&nbsp; Train Valencia→Barcelona (book) &nbsp;·&nbsp; BA8094 booking ref missing &nbsp;·&nbsp; Qantas LHR→SYD ref missing &nbsp;·&nbsp; London hotel payment unclear &nbsp;·&nbsp; Apartamentos Lido payment &nbsp;·&nbsp; Transit to Piraeus &nbsp;·&nbsp; Transfer Fram→London &nbsp;·&nbsp; Transit to LHR
+    </div>
+    <div class="section-label">Journey legs</div>
+    <div id="legs-container"></div>
+  </div>
+
+  <!-- DAY VIEW -->
+  <div id="view-dayview" class="hidden">
+    <div id="day-container"></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="view-calendar" class="hidden">
+    <div class="cal-outer" id="cal-outer"></div>
+    <div id="day-panel-wrap"></div>
+  </div>
+
+</div>
+
+<script>
+const LEGS = [
+  {icon:"✈️",color:"#378ADD",bg:"#E6F1FB",title:"Sydney → Rome",dates:"12–13 Jun",nights:null,details:[
+    {icon:"✈",label:"Flight",val:"QF001 — dep SYD 14:45 on 12 Jun",ref:"FCLI7V",status:"ok"},
+    {icon:"⚠",label:"Note",val:"Confirm & cancel unused flight on 10 Jun",status:"warn"},
+    {icon:"🚗",label:"Transfer",val:"Transit to hotel — to be sorted",status:"warn"}]},
+  {icon:"🏨",color:"#1D9E75",bg:"#E1F5EE",title:"Rome",dates:"13–15 Jun",nights:"2 nights",details:[
+    {icon:"🛏",label:"Hotel",val:"Hotel Big Bang",ref:"6065852160",status:"ok"}]},
+  {icon:"🚆",color:"#534AB7",bg:"#EEEDFE",title:"Rome → Monopoli",dates:"15 Jun",nights:null,details:[
+    {icon:"🚆",label:"Train",val:"Rome to Monopoli — to be booked",status:"warn"},
+    {icon:"🛏",label:"Condo",val:"Monopoli Condo",ref:"HM594AHWZT",status:"ok"}]},
+  {icon:"🏖",color:"#1D9E75",bg:"#E1F5EE",title:"Monopoli",dates:"15–20 Jun",nights:"5 nights",details:[
+    {icon:"🛏",label:"Stay",val:"Monopoli Condo",ref:"HM594AHWZT",status:"ok"}]},
+  {icon:"⛴",color:"#534AB7",bg:"#EEEDFE",title:"Bari → Split (via Frankfurt)",dates:"20 Jun",nights:null,details:[
+    {icon:"⚓",label:"Boat",val:"Bari to Split — paid",status:"ok"},
+    {icon:"✈",label:"Flight",val:"LH4295 — dep 07:30",ref:"8BL6AC",status:"ok"},
+    {icon:"🚗",label:"Transfer",val:"Transit to airport — to be sorted",status:"warn"}]},
+  {icon:"🏖",color:"#1D9E75",bg:"#E1F5EE",title:"Split",dates:"20–27 Jun",nights:"7 nights",details:[
+    {icon:"ℹ",label:"Note",val:"No accommodation listed — check if covered",status:"warn"}]},
+  {icon:"✈️",color:"#378ADD",bg:"#E6F1FB",title:"Split → Athens",dates:"27 Jun",nights:null,details:[
+    {icon:"✈",label:"Flight",val:"Dep 17:55 — flight number unknown",ref:"8U89HO",status:"warn"},
+    {icon:"🛏",label:"Hotel",val:"Domios Suites Athens",ref:"6378248931",status:"ok"}]},
+  {icon:"🏛",color:"#1D9E75",bg:"#E1F5EE",title:"Athens",dates:"27–29 Jun",nights:"2 nights",details:[
+    {icon:"🚗",label:"Transfer",val:"Transit to Piraeus — to be sorted",status:"warn"}]},
+  {icon:"⛴",color:"#534AB7",bg:"#EEEDFE",title:"Athens → Ios (Ferry)",dates:"29 Jun",nights:null,details:[
+    {icon:"⚓",label:"Ferry",val:"Dep Piraeus 09:00",ref:"1112QURXK",status:"ok"},
+    {icon:"🛏",label:"Hotel",val:"Sunrise Hotel, Ios",ref:"6242591024 / PIN 0664",status:"ok"}]},
+  {icon:"🏝",color:"#1D9E75",bg:"#E1F5EE",title:"Ios",dates:"29 Jun – 5 Jul",nights:"6 nights",details:[
+    {icon:"🛏",label:"Hotel",val:"Sunrise Hotel, Ios",ref:"6242591024",status:"ok"}]},
+  {icon:"⛴",color:"#534AB7",bg:"#EEEDFE",title:"Ios → Milos (Ferry)",dates:"5 Jul",nights:null,details:[
+    {icon:"⚓",label:"Ferry",val:"Seajet",ref:"1112QURXW",status:"ok"},
+    {icon:"🛏",label:"Stay",val:"Cycladic home, Adamas — no reference",status:"warn"}]},
+  {icon:"🏝",color:"#1D9E75",bg:"#E1F5EE",title:"Milos",dates:"5–10 Jul",nights:"5 nights",details:[
+    {icon:"🛏",label:"Stay",val:"Cycladic home, Adamas",status:"warn"}]},
+  {icon:"✈️",color:"#378ADD",bg:"#E6F1FB",title:"Milos → Athens → Barcelona → Ibiza",dates:"10–11 Jul",nights:null,details:[
+    {icon:"✈",label:"Sky Express",val:"Milos–Athens dep 20:10",ref:"890SSU",status:"ok"},
+    {icon:"✈",label:"Vueling",val:"Athens–Barcelona dep 04:10",ref:"QHRTWC",status:"ok"},
+    {icon:"✈",label:"Vueling",val:"Barcelona–Ibiza dep 07:50",ref:"QHRTWC",status:"ok"}]},
+  {icon:"🏖",color:"#1D9E75",bg:"#E1F5EE",title:"Ibiza",dates:"11–13 Jul",nights:"2 nights",details:[
+    {icon:"🛏",label:"Stay",val:"Apartamentos Lido — no reference, payment unclear",status:"warn"}]},
+  {icon:"✈️",color:"#378ADD",bg:"#E6F1FB",title:"Ibiza → Majorca",dates:"13 Jul",nights:null,details:[
+    {icon:"✈",label:"Iberia",val:"Dep 11:05",ref:"8HHVSC",status:"ok"},
+    {icon:"🛏",label:"Stay",val:"Bungalow Cala d'Or",ref:"HMX4SDQRYP",status:"ok"}]},
+  {icon:"🏖",color:"#1D9E75",bg:"#E1F5EE",title:"Majorca",dates:"13–18 Jul",nights:"5 nights",details:[
+    {icon:"🛏",label:"Stay",val:"Bungalow Cala d'Or",ref:"HMX4SDQRYP",status:"ok"}]},
+  {icon:"✈️",color:"#378ADD",bg:"#E6F1FB",title:"Majorca → Valencia",dates:"18 Jul",nights:null,details:[
+    {icon:"✈",label:"Air Europa",val:"Dep 10:45",ref:"8UBTJZ",status:"ok"},
+    {icon:"🛏",label:"Hotel",val:"Sweet Hotel Continental",ref:"6997171826 / PIN 6726",status:"ok"}]},
+  {icon:"🏙",color:"#1D9E75",bg:"#E1F5EE",title:"Valencia",dates:"18–20 Jul",nights:"2 nights",details:[
+    {icon:"🛏",label:"Hotel",val:"Sweet Hotel Continental",status:"ok"}]},
+  {icon:"🚆",color:"#534AB7",bg:"#EEEDFE",title:"Valencia → Barcelona (Train)",dates:"20 Jul",nights:null,details:[
+    {icon:"🚆",label:"Train",val:"To be booked and paid",status:"warn"},
+    {icon:"🛏",label:"Apt",val:"Modernist Apartment",ref:"5602837479 / PIN 2630",status:"ok"}]},
+  {icon:"🏙",color:"#1D9E75",bg:"#E1F5EE",title:"Barcelona",dates:"20–23 Jul",nights:"3 nights",details:[
+    {icon:"🛏",label:"Stay",val:"Modernist Apartment",ref:"5602837479",status:"ok"}]},
+  {icon:"✈️",color:"#378ADD",bg:"#E6F1FB",title:"Barcelona → London → Hartford",dates:"23–24 Jul",nights:null,details:[
+    {icon:"✈",label:"BA8094",val:"Dep 07:30 — booking ref missing",status:"warn"},
+    {icon:"🚆",label:"Train",val:"Train to Huntingdon — to be sorted",status:"warn"},
+    {icon:"🏠",label:"Stay",val:"Hartford (family)",status:"ok"}]},
+  {icon:"🏠",color:"#1D9E75",bg:"#E1F5EE",title:"UK (family)",dates:"23–28 Jul",nights:"5 nights",details:[
+    {icon:"🏠",label:"Hartford",val:"Family — 23–24 Jul",status:"ok"},
+    {icon:"🏠",label:"Framlingham",val:"Family — 24–27 Jul",status:"ok"},
+    {icon:"🛏",label:"Hotel",val:"London — 27 Jul — payment unclear",status:"warn"},
+    {icon:"🚗",label:"Transfer",val:"Fram → London — to be sorted",status:"warn"}]},
+  {icon:"✈️",color:"#378ADD",bg:"#E6F1FB",title:"London → Sydney",dates:"28 Jul",nights:null,details:[
+    {icon:"✈",label:"Qantas",val:"LHR to SYD — booking ref missing",status:"warn"},
+    {icon:"🚗",label:"Transfer",val:"Transit to LHR — to be sorted",status:"warn"}]}
+];
+
+const DAYS = [
+  {d:"Wed",dt:10,mon:"Jun",locs:[],travel:[],refs:[],actions:["Confirm & cancel unused flight"]},
+  {d:"Thu",dt:11,mon:"Jun",locs:[],travel:[],refs:[],actions:[]},
+  {d:"Fri",dt:12,mon:"Jun",locs:["Depart Sydney"],travel:["QF001 SYD dep 14:45 — be at airport by 11:45"],refs:["FCLI7V"],actions:[]},
+  {d:"Sat",dt:13,mon:"Jun",locs:["Arrive Rome · Hotel Big Bang"],travel:["Transit to hotel — to be confirmed"],refs:["6065852160"],actions:[]},
+  {d:"Sun",dt:14,mon:"Jun",locs:["Rome"],travel:[],refs:[],actions:[]},
+  {d:"Mon",dt:15,mon:"Jun",locs:["Rome → Monopoli · Monopoli Condo"],travel:["Train Rome → Monopoli — to be booked!"],refs:["HM594AHWZT"],actions:[]},
+  {d:"Tue",dt:16,mon:"Jun",locs:["Monopoli"],travel:[],refs:[],actions:[]},
+  {d:"Wed",dt:17,mon:"Jun",locs:["Monopoli"],travel:[],refs:[],actions:[]},
+  {d:"Thu",dt:18,mon:"Jun",locs:["Monopoli"],travel:[],refs:[],actions:[]},
+  {d:"Fri",dt:19,mon:"Jun",locs:["Monopoli"],travel:[],refs:[],actions:[]},
+  {d:"Sat",dt:20,mon:"Jun",locs:["Depart Bari → Split (via Frankfurt)"],travel:["LH4295 dep 07:30 · Boat Bari→Split · Transit to airport — to check"],refs:["8BL6AC"],actions:[]},
+  {d:"Sun",dt:21,mon:"Jun",locs:["Split"],travel:[],refs:[],actions:[]},
+  {d:"Mon",dt:22,mon:"Jun",locs:["Split"],travel:[],refs:[],actions:[]},
+  {d:"Tue",dt:23,mon:"Jun",locs:["Split"],travel:[],refs:[],actions:[]},
+  {d:"Wed",dt:24,mon:"Jun",locs:["Split"],travel:[],refs:[],actions:[]},
+  {d:"Thu",dt:25,mon:"Jun",locs:["Split"],travel:[],refs:[],actions:[]},
+  {d:"Fri",dt:26,mon:"Jun",locs:["Split"],travel:[],refs:[],actions:[]},
+  {d:"Sat",dt:27,mon:"Jun",locs:["Split → Athens · Domios Suites"],travel:["Flight dep 17:55 — flight number unknown"],refs:["8U89HO","6378248931"],actions:[]},
+  {d:"Sun",dt:28,mon:"Jun",locs:["Athens"],travel:[],refs:[],actions:[]},
+  {d:"Mon",dt:29,mon:"Jun",locs:["Ferry to Ios · Sunrise Hotel"],travel:["Ferry dep Piraeus 09:00 · Transit to Piraeus — to sort!"],refs:["1112QURXK","6242591024"],actions:[]},
+  {d:"Tue",dt:30,mon:"Jun",locs:["Ios"],travel:[],refs:[],actions:[]},
+  {d:"Wed",dt:1,mon:"Jul",locs:["Ios"],travel:[],refs:[],actions:[]},
+  {d:"Thu",dt:2,mon:"Jul",locs:["Ios"],travel:[],refs:[],actions:[]},
+  {d:"Fri",dt:3,mon:"Jul",locs:["Ios"],travel:[],refs:[],actions:[]},
+  {d:"Sat",dt:4,mon:"Jul",locs:["Ios"],travel:[],refs:[],actions:[]},
+  {d:"Sun",dt:5,mon:"Jul",locs:["Ios → Milos · Cycladic home"],travel:["Seajet ferry"],refs:["1112QURXW"],actions:[]},
+  {d:"Mon",dt:6,mon:"Jul",locs:["Milos"],travel:[],refs:[],actions:[]},
+  {d:"Tue",dt:7,mon:"Jul",locs:["Milos"],travel:[],refs:[],actions:[]},
+  {d:"Wed",dt:8,mon:"Jul",locs:["Milos"],travel:[],refs:[],actions:[]},
+  {d:"Thu",dt:9,mon:"Jul",locs:["Milos"],travel:[],refs:[],actions:[]},
+  {d:"Fri",dt:10,mon:"Jul",locs:["In transit: Milos → Athens → Barcelona → Ibiza"],travel:["Sky Express dep 20:10 · Vueling dep 04:10 · Vueling dep 07:50"],refs:["890SSU","QHRTWC"],actions:[]},
+  {d:"Sat",dt:11,mon:"Jul",locs:["Arrive Ibiza · Apartamentos Lido"],travel:[],refs:[],actions:["Confirm Lido booking & payment"]},
+  {d:"Sun",dt:12,mon:"Jul",locs:["Ibiza"],travel:[],refs:[],actions:[]},
+  {d:"Mon",dt:13,mon:"Jul",locs:["Ibiza → Majorca · Bungalow Cala d'Or"],travel:["Iberia dep 11:05"],refs:["8HHVSC","HMX4SDQRYP"],actions:[]},
+  {d:"Tue",dt:14,mon:"Jul",locs:["Majorca"],travel:[],refs:[],actions:[]},
+  {d:"Wed",dt:15,mon:"Jul",locs:["Majorca"],travel:[],refs:[],actions:[]},
+  {d:"Thu",dt:16,mon:"Jul",locs:["Majorca"],travel:[],refs:[],actions:[]},
+  {d:"Fri",dt:17,mon:"Jul",locs:["Majorca"],travel:[],refs:[],actions:[]},
+  {d:"Sat",dt:18,mon:"Jul",locs:["Majorca → Valencia · Sweet Hotel Continental"],travel:["Air Europa dep 10:45"],refs:["8UBTJZ","6997171826"],actions:[]},
+  {d:"Sun",dt:19,mon:"Jul",locs:["Valencia"],travel:[],refs:[],actions:[]},
+  {d:"Mon",dt:20,mon:"Jul",locs:["Valencia → Barcelona · Modernist Apartment"],travel:["Train — to be booked!"],refs:["5602837479"],actions:[]},
+  {d:"Tue",dt:21,mon:"Jul",locs:["Barcelona"],travel:[],refs:[],actions:[]},
+  {d:"Wed",dt:22,mon:"Jul",locs:["Barcelona"],travel:[],refs:[],actions:[]},
+  {d:"Thu",dt:23,mon:"Jul",locs:["Barcelona → London → Hartford"],travel:["BA8094 dep 07:30 — ref missing! · Train to Huntingdon"],refs:[],actions:[]},
+  {d:"Fri",dt:24,mon:"Jul",locs:["Framlingham (family)"],travel:[],refs:[],actions:[]},
+  {d:"Sat",dt:25,mon:"Jul",locs:["Framlingham"],travel:[],refs:[],actions:[]},
+  {d:"Sun",dt:26,mon:"Jul",locs:["Framlingham"],travel:[],refs:[],actions:[]},
+  {d:"Mon",dt:27,mon:"Jul",locs:["London — hotel TBC"],travel:["Fram → London — to sort"],refs:[],actions:["Confirm London hotel & payment"]},
+  {d:"Tue",dt:28,mon:"Jul",locs:["Depart London → Sydney"],travel:["Qantas LHR → SYD — ref missing! · Transit to LHR"],refs:[],actions:[]},
+];
+
+const CAL_DATA = {
+  "2026-6-10":{label:"Sydney",chips:[{t:"Cancel unused flight",cls:"chip-action"}],rows:[{icon:"⚠️",val:"Confirm & cancel unused flight today"}]},
+  "2026-6-12":{label:"Depart Sydney",chips:[{t:"QF001 dep 14:45",cls:"chip-travel"}],rows:[{icon:"✈️",val:"QF001 departs SYD 14:45"},{icon:"🏷",val:"Ref: FCLI7V"},{icon:"⏰",val:"Be at airport by 11:45"}]},
+  "2026-6-13":{label:"Arrive Rome",chips:[{t:"Hotel Big Bang",cls:"chip-stay"}],rows:[{icon:"✈️",val:"Arrive Rome"},{icon:"🛏",val:"Hotel Big Bang"},{icon:"🏷",val:"Ref: 6065852160"},{icon:"🚗",val:"Transit to hotel — to be arranged"}]},
+  "2026-6-14":{label:"Rome",chips:[{t:"Hotel Big Bang",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Hotel Big Bang, Rome"},{icon:"🏷",val:"Ref: 6065852160"}]},
+  "2026-6-15":{label:"Rome → Monopoli",chips:[{t:"Train — book!",cls:"chip-action"},{t:"Monopoli Condo",cls:"chip-stay"}],rows:[{icon:"🚆",val:"Train Rome → Monopoli — still to be booked"},{icon:"🛏",val:"Monopoli Condo"},{icon:"🏷",val:"Ref: HM594AHWZT"}]},
+  "2026-6-16":{label:"Monopoli",chips:[{t:"Monopoli Condo",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Monopoli Condo"},{icon:"🏷",val:"Ref: HM594AHWZT"}]},
+  "2026-6-17":{label:"Monopoli",chips:[{t:"Monopoli Condo",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Monopoli Condo"},{icon:"🏷",val:"Ref: HM594AHWZT"}]},
+  "2026-6-18":{label:"Monopoli",chips:[{t:"Monopoli Condo",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Monopoli Condo"},{icon:"🏷",val:"Ref: HM594AHWZT"}]},
+  "2026-6-19":{label:"Monopoli",chips:[{t:"Monopoli Condo",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Monopoli Condo"},{icon:"🏷",val:"Ref: HM594AHWZT"}]},
+  "2026-6-20":{label:"Bari → Split",chips:[{t:"LH4295 dep 07:30",cls:"chip-travel"},{t:"Check transfer",cls:"chip-action"}],rows:[{icon:"✈️",val:"LH4295 departs 07:30 (Bari → Split via Frankfurt)"},{icon:"🏷",val:"Ref: 8BL6AC"},{icon:"⚓",val:"Boat Bari to Split — paid"},{icon:"🚗",val:"Transit to airport — to be arranged"}]},
+  "2026-6-21":{label:"Split",chips:[{t:"Split",cls:"chip-stay"}],rows:[{icon:"📍",val:"Split — accommodation details TBC"}]},
+  "2026-6-22":{label:"Split",chips:[{t:"Split",cls:"chip-stay"}],rows:[{icon:"📍",val:"Split"}]},
+  "2026-6-23":{label:"Split",chips:[{t:"Split",cls:"chip-stay"}],rows:[{icon:"📍",val:"Split"}]},
+  "2026-6-24":{label:"Split",chips:[{t:"Split",cls:"chip-stay"}],rows:[{icon:"📍",val:"Split"}]},
+  "2026-6-25":{label:"Split",chips:[{t:"Split",cls:"chip-stay"}],rows:[{icon:"📍",val:"Split"}]},
+  "2026-6-26":{label:"Split",chips:[{t:"Split",cls:"chip-stay"}],rows:[{icon:"📍",val:"Split"}]},
+  "2026-6-27":{label:"Split → Athens",chips:[{t:"Flight dep 17:55",cls:"chip-travel"},{t:"Domios Suites",cls:"chip-stay"}],rows:[{icon:"✈️",val:"Flight Split → Athens — dep 17:55 (flight number unknown)"},{icon:"🏷",val:"Ref: 8U89HO"},{icon:"🛏",val:"Domios Suites Athens"},{icon:"🏷",val:"Ref: 6378248931"}]},
+  "2026-6-28":{label:"Athens",chips:[{t:"Domios Suites",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Domios Suites Athens"},{icon:"🏷",val:"Ref: 6378248931"}]},
+  "2026-6-29":{label:"Athens → Ios",chips:[{t:"Ferry dep 09:00",cls:"chip-travel"},{t:"Sort Piraeus transit",cls:"chip-action"}],rows:[{icon:"⛴",val:"Ferry Piraeus → Ios — dep 09:00"},{icon:"🏷",val:"Ref: 1112QURXK"},{icon:"🚗",val:"Transit to Piraeus — to be sorted"},{icon:"🛏",val:"Sunrise Hotel, Ios"},{icon:"🏷",val:"Ref: 6242591024 / PIN: 0664"}]},
+  "2026-6-30":{label:"Ios",chips:[{t:"Sunrise Hotel",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Sunrise Hotel, Ios"},{icon:"🏷",val:"Ref: 6242591024"}]},
+  "2026-7-1":{label:"Ios",chips:[{t:"Sunrise Hotel",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Sunrise Hotel, Ios"},{icon:"🏷",val:"Ref: 6242591024"}]},
+  "2026-7-2":{label:"Ios",chips:[{t:"Sunrise Hotel",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Sunrise Hotel, Ios"},{icon:"🏷",val:"Ref: 6242591024"}]},
+  "2026-7-3":{label:"Ios",chips:[{t:"Sunrise Hotel",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Sunrise Hotel, Ios"},{icon:"🏷",val:"Ref: 6242591024"}]},
+  "2026-7-4":{label:"Ios",chips:[{t:"Sunrise Hotel",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Sunrise Hotel, Ios"},{icon:"🏷",val:"Ref: 6242591024"}]},
+  "2026-7-5":{label:"Ios → Milos",chips:[{t:"Seajet ferry",cls:"chip-travel"},{t:"Cycladic home",cls:"chip-stay"}],rows:[{icon:"⛴",val:"Seajet ferry Ios → Milos"},{icon:"🏷",val:"Ref: 1112QURXW"},{icon:"🛏",val:"Cycladic home, Adamas — no booking ref"}]},
+  "2026-7-6":{label:"Milos",chips:[{t:"Cycladic home",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Cycladic home, Adamas"}]},
+  "2026-7-7":{label:"Milos",chips:[{t:"Cycladic home",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Cycladic home, Adamas"}]},
+  "2026-7-8":{label:"Milos",chips:[{t:"Cycladic home",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Cycladic home, Adamas"}]},
+  "2026-7-9":{label:"Milos",chips:[{t:"Cycladic home",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Cycladic home, Adamas"}]},
+  "2026-7-10":{label:"Milos → Ibiza (via Athens, Barcelona)",chips:[{t:"3 flights",cls:"chip-transit"}],rows:[{icon:"✈️",val:"Sky Express: Milos → Athens dep 20:10"},{icon:"🏷",val:"Ref: 890SSU"},{icon:"✈️",val:"Vueling: Athens → Barcelona dep 04:10"},{icon:"✈️",val:"Vueling: Barcelona → Ibiza dep 07:50"},{icon:"🏷",val:"Ref: QHRTWC"}]},
+  "2026-7-11":{label:"Arrive Ibiza",chips:[{t:"Apartamentos Lido",cls:"chip-stay"},{t:"Confirm booking",cls:"chip-action"}],rows:[{icon:"🛏",val:"Apartamentos Lido, Ibiza — no reference"},{icon:"⚠️",val:"Payment status unclear — confirm booking"}]},
+  "2026-7-12":{label:"Ibiza",chips:[{t:"Apartamentos Lido",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Apartamentos Lido, Ibiza"}]},
+  "2026-7-13":{label:"Ibiza → Majorca",chips:[{t:"Iberia dep 11:05",cls:"chip-travel"},{t:"Bungalow Cala d'Or",cls:"chip-stay"}],rows:[{icon:"✈️",val:"Iberia: Ibiza → Majorca dep 11:05"},{icon:"🏷",val:"Ref: 8HHVSC"},{icon:"🛏",val:"Bungalow Cala d'Or"},{icon:"🏷",val:"Ref: HMX4SDQRYP"}]},
+  "2026-7-14":{label:"Majorca",chips:[{t:"Bungalow Cala d'Or",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Bungalow Cala d'Or"},{icon:"🏷",val:"Ref: HMX4SDQRYP"}]},
+  "2026-7-15":{label:"Majorca",chips:[{t:"Bungalow Cala d'Or",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Bungalow Cala d'Or"},{icon:"🏷",val:"Ref: HMX4SDQRYP"}]},
+  "2026-7-16":{label:"Majorca",chips:[{t:"Bungalow Cala d'Or",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Bungalow Cala d'Or"},{icon:"🏷",val:"Ref: HMX4SDQRYP"}]},
+  "2026-7-17":{label:"Majorca",chips:[{t:"Bungalow Cala d'Or",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Bungalow Cala d'Or"},{icon:"🏷",val:"Ref: HMX4SDQRYP"}]},
+  "2026-7-18":{label:"Majorca → Valencia",chips:[{t:"Air Europa dep 10:45",cls:"chip-travel"},{t:"Sweet Hotel Continental",cls:"chip-stay"}],rows:[{icon:"✈️",val:"Air Europa: Majorca → Valencia dep 10:45"},{icon:"🏷",val:"Ref: 8UBTJZ"},{icon:"🛏",val:"Sweet Hotel Continental, Valencia"},{icon:"🏷",val:"Ref: 6997171826 / PIN: 6726"}]},
+  "2026-7-19":{label:"Valencia",chips:[{t:"Sweet Hotel Continental",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Sweet Hotel Continental"},{icon:"🏷",val:"Ref: 6997171826"}]},
+  "2026-7-20":{label:"Valencia → Barcelona",chips:[{t:"Train — book!",cls:"chip-action"},{t:"Modernist Apartment",cls:"chip-stay"}],rows:[{icon:"🚆",val:"Train Valencia → Barcelona — to be booked & paid"},{icon:"🛏",val:"Modernist Apartment, Barcelona"},{icon:"🏷",val:"Ref: 5602837479 / PIN: 2630"}]},
+  "2026-7-21":{label:"Barcelona",chips:[{t:"Modernist Apartment",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Modernist Apartment"},{icon:"🏷",val:"Ref: 5602837479"}]},
+  "2026-7-22":{label:"Barcelona",chips:[{t:"Modernist Apartment",cls:"chip-stay"}],rows:[{icon:"🛏",val:"Modernist Apartment"},{icon:"🏷",val:"Ref: 5602837479"}]},
+  "2026-7-23":{label:"Barcelona → London",chips:[{t:"BA8094 dep 07:30",cls:"chip-travel"},{t:"Ref missing!",cls:"chip-action"}],rows:[{icon:"✈️",val:"BA8094: Barcelona → London dep 07:30 — booking ref missing"},{icon:"🚆",val:"Train to Huntingdon — to be sorted"},{icon:"🏠",val:"Hartford (family)"}]},
+  "2026-7-24":{label:"Framlingham (family)",chips:[{t:"Family stay",cls:"chip-stay"}],rows:[{icon:"🏠",val:"Framlingham — family"}]},
+  "2026-7-25":{label:"Framlingham",chips:[{t:"Family stay",cls:"chip-stay"}],rows:[{icon:"🏠",val:"Framlingham — family"}]},
+  "2026-7-26":{label:"Framlingham",chips:[{t:"Family stay",cls:"chip-stay"}],rows:[{icon:"🏠",val:"Framlingham — family"}]},
+  "2026-7-27":{label:"London",chips:[{t:"Hotel TBC",cls:"chip-action"}],rows:[{icon:"🚗",val:"Fram → London — transit to be sorted"},{icon:"🛏",val:"London hotel — payment unclear"}]},
+  "2026-7-28":{label:"Depart London → Sydney",chips:[{t:"Qantas LHR→SYD",cls:"chip-travel"},{t:"Ref missing!",cls:"chip-action"}],rows:[{icon:"✈️",val:"Qantas: LHR → SYD — booking ref missing"},{icon:"🚗",val:"Transit to LHR — to be sorted"}]},
+};
+
+let selectedKey = null;
+
+function showView(v) {
+  ['summary','dayview','calendar'].forEach(n => {
+    document.getElementById('view-'+n).classList.toggle('hidden', n !== v);
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-'+v).classList.add('active');
+}
+
+function badge(s) {
+  return s === 'ok'
+    ? '<span class="badge badge-ok">✓ Confirmed</span>'
+    : '<span class="badge badge-warn">⚠ Action needed</span>';
+}
+
+function buildLegs() {
+  const c = document.getElementById('legs-container');
+  LEGS.forEach((leg, i) => {
+    const div = document.createElement('div');
+    div.className = 'leg-card';
+    const det = leg.details.map(d =>
+      `<div class="detail-row">
+        <span class="d-icon">${d.icon}</span>
+        <span class="d-label">${d.label}</span>
+        <span class="d-val">${d.val}${d.ref ? `<span class="ref-pill">${d.ref}</span>` : ''}</span>
+        <span>${badge(d.status)}</span>
+      </div>`
+    ).join('');
+    div.innerHTML = `
+      <div class="leg-header" onclick="toggleLeg(${i})">
+        <div class="leg-icon" style="background:${leg.bg};font-size:18px;">${leg.icon}</div>
+        <div class="leg-meta">
+          <div class="leg-title">${leg.title}</div>
+          <div class="leg-dates">${leg.dates}</div>
+        </div>
+        ${leg.nights ? `<span class="leg-nights">${leg.nights}</span>` : ''}
+        <span class="chev" id="chev-${i}">▾</span>
+      </div>
+      <div class="leg-body hidden" id="legbody-${i}">${det}</div>`;
+    c.appendChild(div);
+  });
+}
+
+function toggleLeg(i) {
+  document.getElementById('legbody-' + i).classList.toggle('hidden');
+  document.getElementById('chev-' + i).classList.toggle('open');
+}
+
+function buildDayView() {
+  const c = document.getElementById('day-container');
+  let lastMon = '';
+  DAYS.forEach(day => {
+    if (day.mon !== lastMon) {
+      const h = document.createElement('div');
+      h.className = 'month-hdr';
+      h.textContent = day.mon + ' 2026';
+      c.appendChild(h);
+      lastMon = day.mon;
+    }
+    const row = document.createElement('div');
+    row.className = 'day-row';
+    let html = '';
+    if (day.locs.length) html += `<div class="day-loc">${day.locs.join(' · ')}</div>`;
+    day.travel.forEach(t => html += `<div class="travel-banner">✈ ${t}</div>`);
+    if (day.refs.length) html += `<div style="margin-top:4px;font-size:12px;color:#6b6b6b;">${day.refs.map(r => `<span class="ref-pill">${r}</span>`).join('')}</div>`;
+    day.actions.forEach(a => html += `<div class="action-banner-sm">⚠ ${a}</div>`);
+    if (!day.locs.length && !day.travel.length && !day.actions.length) {
+      html = `<div class="quiet">Continuing at location above</div>`;
+    }
+    row.innerHTML = `
+      <div class="day-date-col">
+        <div class="ddd">${day.d}</div>
+        <div class="ddn">${day.dt}</div>
+      </div>
+      <div class="day-content">${html}</div>`;
+    c.appendChild(row);
+  });
+}
+
+const MONTHS = [
+  { name: 'June 2026', year: 2026, month: 6, days: 30 },
+  { name: 'July 2026', year: 2026, month: 7, days: 31 }
+];
+const DOWS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MON_NAMES = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function buildCalendars() {
+  const outer = document.getElementById('cal-outer');
+  MONTHS.forEach(m => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cal-card';
+    const firstDay = new Date(m.year, m.month - 1, 1).getDay();
+    const offset = firstDay === 0 ? 6 : firstDay - 1;
+    let html = `<div class="cal-hdr">${m.name}</div><div class="cal-grid">`;
+    DOWS.forEach(d => html += `<div class="cal-dow">${d}</div>`);
+    for (let i = 0; i < offset; i++) html += `<div class="cal-cell empty"></div>`;
+    for (let d = 1; d <= m.days; d++) {
+      const key = `${m.year}-${m.month}-${d}`;
+      const info = CAL_DATA[key];
+      if (info) {
+        const chips = info.chips.slice(0, 2).map(c => `<span class="cal-chip ${c.cls}">${c.t}</span>`).join('');
+        html += `<div class="cal-cell" id="cell-${key}" onclick="selectDay('${key}')">
+          <div class="cal-num">${d}</div>
+          <div style="font-size:10px;color:#6b6b6b;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${info.label}</div>
+          ${chips}</div>`;
+      } else {
+        html += `<div class="cal-cell empty"><div class="cal-num">${d}</div></div>`;
+      }
+    }
+    html += `</div>`;
+    wrap.innerHTML = html;
+    outer.appendChild(wrap);
+  });
+}
+
+function selectDay(key) {
+  if (selectedKey) {
+    const prev = document.getElementById('cell-' + selectedKey);
+    if (prev) prev.classList.remove('selected');
+  }
+  if (selectedKey === key) {
+    selectedKey = null;
+    document.getElementById('day-panel-wrap').innerHTML = '';
+    return;
+  }
+  selectedKey = key;
+  const cell = document.getElementById('cell-' + key);
+  if (cell) cell.classList.add('selected');
+  showDayPanel(key);
+}
+
+function showDayPanel(key) {
+  const info = CAL_DATA[key];
+  const pw = document.getElementById('day-panel-wrap');
+  if (!info) { pw.innerHTML = ''; return; }
+  const [y, m, d] = key.split('-');
+  const dateStr = `${d} ${MON_NAMES[parseInt(m)]} ${y}`;
+  const rows = info.rows.map(r =>
+    `<div class="panel-row"><span class="pi">${r.icon}</span><span class="pv">${r.val}</span></div>`
+  ).join('');
+  pw.innerHTML = `<div class="day-panel">
+    <div class="panel-hdr">
+      <div class="panel-title">${dateStr} — ${info.label}</div>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>${rows}</div>`;
+  pw.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closePanel() {
+  if (selectedKey) {
+    const c = document.getElementById('cell-' + selectedKey);
+    if (c) c.classList.remove('selected');
+    selectedKey = null;
+  }
+  document.getElementById('day-panel-wrap').innerHTML = '';
+}
+
+buildLegs();
+buildDayView();
+buildCalendars();
+</script>
+</body>
+</html>
